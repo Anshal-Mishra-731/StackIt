@@ -135,13 +135,13 @@ func GetQuestions() gin.HandlerFunc {
 func GetQuestionByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
 
 		var question models.Question
 
 		questionId := c.Param("question_id")
 
-		err := questionCollection.FindOne(ctx, bson.M{"question_id": questionId})
-		defer cancel()
+		err := questionCollection.FindOne(ctx, bson.M{"question_id": questionId}).Decode(&question)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to get question from given Id"})
 			return
